@@ -32,18 +32,18 @@ script:
   - pytest --cov=pymer4
 
 after_success:
-  - conda install codecov && codecov
-
-before_deploy:
-  # install necessary packages and refresh the docs before deployment
+  # - conda install codecov && codecov
   - conda install sphinx sphinx_bootstrap_theme sphinx-gallery -c conda-forge
   - cd docs && make clean && make html
+  - pwd
 
 deploy:
 
   # allow any commit to master to refresh the docs on gh-pages
   - provider: pages
     skip_cleanup: true
+    keep_history: true
+    local_dir: docs/_build/html
     github_token: $GITHUB_TOKEN  # from github, set in TravisCI settings
     on:
       # branch: master
@@ -54,7 +54,7 @@ deploy:
   # tagged vM.N.P to the main label.
   - provider: script
     skip_cleanup: true
-    script: bash ./ci/conda_upload.sh
+    script: bash /home/travis/build/ejolly/pymer4/ci/conda_upload.sh
     on:
       all_branches: true  # always dry-run the script
 
