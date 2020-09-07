@@ -48,7 +48,7 @@ deploy:
     github_token: $GITHUB_TOKEN  # from github, set in TravisCI settings
     local_dir: ./docs/_build/html
     on:
-      branch: master
+      branch: deploy_test
       # all_branches: true  # testing only
       # condition: $TRAVIS_BRANCH =~ ^(master)$|^(dev)$
 
