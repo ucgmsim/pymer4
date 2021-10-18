@@ -184,7 +184,7 @@ jobs:
       # 8b. Deploy package to pre-release conda channel (only for 3.8 which handles deployment) but each OS uploads their own and linux uploads for linux and windows
       # Only runs when a PR is merged into master or there's a direct push to master
       - name: Conda pre-release deploy
-        if: ${{ ((github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event.pull_request.merged && github.base_ref == 'master' && github.head_ref == 'dev')) }}
+        if: ${{ ((github.event_name == 'push' && (github.ref == 'refs/heads/ci_debug' || github.ref == 'refs/heads/master')) || (github.event.pull_request.merged && github.base_ref == 'master' && github.head_ref == 'dev')) }}
         env:
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
         run: |
