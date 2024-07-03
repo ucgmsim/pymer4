@@ -110,7 +110,7 @@ print(model.coefs)
 # which vary because we parameterized our rfx that way above
 print(model.fixef.head(5))
 
-###############################################################################
+############################################################################### test
 
 # Get group level deviates from population level coefficients (i.e. rfx)
 print(model.ranef.head(5))
