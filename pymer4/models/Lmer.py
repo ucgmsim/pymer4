@@ -67,6 +67,7 @@ class Lmer(object):
         fits (numpy.ndarray): model fits/predictions
         model_obj (lmer model): rpy2 lmer model object
         factors (dict): factors used to fit the model if any
+        ranef_df (pd.DataFrame): Contains the best linear unbiased predictors (BLUPs) (also called the conditional modes) and the conditional standard deviations of the random effects
 
     """
 
@@ -108,6 +109,7 @@ class Lmer(object):
         self.sig_type = None
         self.factors_prev_ = None
         self.contrasts = None
+        self.ranef_df = None
 
     def __repr__(self):
         out = "{}(fitted = {}, formula = {}, family = {})".format(
@@ -824,6 +826,30 @@ class Lmer(object):
             self.ranef = [R2pandas(e).drop(columns=["index"]) for e in ranefs]
         else:
             self.ranef = R2pandas(ranefs[0]).drop(columns=["index"])
+
+        # Cluster (e.g subject) level random deviations and their associated conditional standard deviations
+
+        rstring = """
+            function(model){
+            ranef_df <- as.data.frame(ranef(model, condVar=TRUE))
+            }
+        """
+
+        get_ranef_r_df = robjects.r(rstring)
+        ranef_r_df = get_ranef_r_df(self.model_obj)
+
+        # Converting the R dataframe to a Pandas dataframe.
+        self.ranef_df = robjects.pandas2ri.rpy2py(ranef_r_df)
+
+        # ranef_r_df[2] is an R FactorVector that is automatically converted to int R factors for Pandas
+        # so we replace the int R factors in the grp column with their associated strings.
+        # [factor - 1] is used because factor is an R index which starts at 1 (Python indexing starts at 0).
+        self.ranef_df["grp"] = [
+            ranef_r_df[2].levels[factor - 1] for factor in ranef_r_df[2]
+        ]
+        # The R indices are automatically preserved as strings but they are just integers which do not need to be as
+        # strings. We therefore reset the index.
+        self.ranef_df.reset_index(drop=True, inplace=True)
 
         # Model residuals
         rstring = """
